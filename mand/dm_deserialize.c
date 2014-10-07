@@ -71,7 +71,7 @@ startElement(void *userData, const char *name, const char **atts)
 
 	int xid = 0;
 	int ntfy = 0;
-	dm_id id;
+	dm_id id = DM_ERR;
 
 	for (int i = 0; atts[i]; i += 2) {
 		if (strcasecmp("instance", atts[i]) == 0) {
@@ -185,7 +185,7 @@ startElement(void *userData, const char *name, const char **atts)
 static void string_unescape(char *text, const char *s, int len)
 {
 	int in_c = 0;
-	char c;
+	char c = 0;
 	char *d = text + strlen(text);
 
 	while (len) {
