@@ -220,6 +220,17 @@ def print_node(s, module, typedefs, groupings, augments, deviations, annotations
                     if leaf.arg == key.arg:
                         type = seek_type(leaf.search_one('type'), leaf, builtin_types, typedefs)
                         key_leafs[key.arg] = type.arg
+                for uses in s.search('uses'):
+                    if ':' in uses.arg:
+                        grouping_name = uses.arg
+                    else:
+                        grouping_name = uses.i_module.i_prefix + ':' + uses.arg
+                    grouping = groupings[grouping_name]
+
+                    for leaf in grouping.search('leaf'):
+                        if leaf.arg == key.arg:
+                            type = seek_type(leaf.search_one('type'), leaf, builtin_types, typedefs)
+                            key_leafs[key.arg] = type.arg
 
             fd.write("const struct index_definition " + "index_" + name + " =\n")
             fd.write("{\n")
@@ -262,7 +273,11 @@ def print_node(s, module, typedefs, groupings, augments, deviations, annotations
                         if substmt.keyword in ['container', 'list', 'leaf', 'leaf-list']:
                             counter += print_field(fd, substmt, typedefs, annotations, counter, keys, write_access=get_write_access(write_access, child))
             elif child.keyword == 'uses':
-                grouping = groupings[child.i_module.i_prefix + ':' + child.arg]
+                if ':' in child.arg:
+                    grouping_name = child.arg
+                else:
+                    grouping_name = child.i_module.i_prefix + ':' + child.arg
+                grouping = groupings[grouping_name]
                 for groupchild in grouping.substmts:
                     if groupchild.keyword in ['container', 'list', 'leaf', 'leaf-list', 'choice']:
                         counter += print_field(fd, groupchild, typedefs, annotations, counter, keys, prefix=make_name(s)+'__', write_access=get_write_access(write_access, child))
