@@ -73,14 +73,14 @@ module isis {
         }
     }
 
-    augment "/rt:routing/rt:routing-state/rt:ribs/rt:rib/rt:routes/rt:route" {
+    augment "/rt:routing-state/rt:ribs/rt:rib/rt:routes/rt:route" {
         when "rt:source-protocol = 'isis:isis'" {
             description "ISIS-specific route attributes.";
         }
         uses isis-route-content;
       }
 
-    augment "/rt:active-route/rt:output/rt:route/"
+    augment "/rt:active-route/rt:output/rt:route"
        {
         description "ISIS-specific route attributes.";
         uses isis-route-content;
@@ -409,7 +409,7 @@ module isis {
         description "ISIS is enabled on interfaces that have an entry in this list, unless 'enabled' is set to 'false' for that entry.";
         leaf name {
             type leafref {
-                path "/rt:routing/rt:router/rt:interfaces/rt:interfaces/rt:interface/rt:name";
+                path "/rt:routing/rt:routing-instance/rt:interfaces/rt:interface/rt:name";
             }
         }
         leaf level {
@@ -532,7 +532,7 @@ module isis {
         }
     }
 
-    augment "/rt:routing/rt:routing-instance/rt:routing-protocols/rt:routing-protocol/" {
+    augment "/rt:routing/rt:routing-instance/rt:routing-protocols/rt:routing-protocol" {
         when "rt:type = 'isis:isis'" {
             description "This augment is only valid when routing protocol instance type is isis.";
         }
