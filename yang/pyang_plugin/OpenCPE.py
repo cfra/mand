@@ -280,7 +280,7 @@ def print_node(s, module, typedefs, groupings, augments, deviations, annotations
                 grouping = groupings[grouping_name]
                 for groupchild in grouping.substmts:
                     if groupchild.keyword in ['container', 'list', 'leaf', 'leaf-list', 'choice']:
-                        counter += print_field(fd, groupchild, typedefs, annotations, counter, keys, prefix=make_name(s)+'__', write_access=get_write_access(write_access, child))
+                        counter += print_field(fd, groupchild, typedefs, annotations, counter, keys, prefix=make_name(s)+'__', virt_parent=s, write_access=get_write_access(write_access, child))
 
 
         fd.write(tab + "},\n")
@@ -306,8 +306,7 @@ def collect_unions(type, child, builtin_types, typedefs):
             types.append(new_type)
     return types
 
-def print_field(fd, child, typedefs, annotations, counter, keys, prefix='', write_access=True):
-
+def print_field(fd, child, typedefs, annotations, counter, keys, prefix='', write_access=True, virt_parent=None):
     #include the annotations if neccassary
     action = None
     flags = ['F_READ']
@@ -382,7 +381,13 @@ def print_field(fd, child, typedefs, annotations, counter, keys, prefix='', writ
                 header_key = make_key(child, keep_hyphens=False)
                 hyphen_key = make_key(child, keep_hyphens=True)
 
-            name = make_name(child.parent)
+            # fields introduced by invoking 'uses' should be parented at the node where 'uses' was invoked,
+            # not at the grouping invoked.
+            if virt_parent is None:
+                name = make_name(child.parent)
+            else:
+                name = make_name(virt_parent)
+
             header_collector.insert(0, "#define " + "field_" + name + "_" + header_key + " " + str(counter) + "\n")
 
             fd.write(2*tab + "{\n")
@@ -421,7 +426,13 @@ def print_field(fd, child, typedefs, annotations, counter, keys, prefix='', writ
             fd.write(2*tab + "},\n")
 
     else:
-        name = make_name(child.parent)
+        # fields introduced by invoking 'uses' should be parented at the node where 'uses' was invoked,
+        # not at the grouping invoked.
+        if virt_parent is None:
+            name = make_name(child.parent)
+        else:
+            name = make_name(virt_parent)
+
         header_collector.insert(0, "#define " + "field_" + name + "_" + make_key(child) + " " + str(counter) + "\n")
 
         fd.write(2*tab + "{\n")
